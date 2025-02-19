@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'user',
     'speaker',
+    'organiser',
+    'book',
     'schedule',
     'drf_yasg',
     "corsheaders",

@@ -52,9 +52,9 @@ urlpatterns = [
     path('api/user/', include('user.urls')),
     path('api/speaker/', include('speaker.urls')),
     path('api/schedule/', include('schedule.urls')),
-    # path('api/news/', include('news.urls')),
-    # path('api/hadis/', include('hadis.urls')),
-    # path('api/muhaddis/', include('muhaddis.urls')),
+    path('api/book/', include('book.urls')),
+    path('api/organiser/', include('organiser.urls')),
+
 
     path('docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),

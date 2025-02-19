@@ -37,7 +37,7 @@ class BothHttpAndHttpsSchemaGenerator(OpenAPISchemaGenerator):
 
 schema_view = get_schema_view(
    openapi.Info(
-      title="Arbian  API",
+      title="Apasl  API",
       default_version='v1',
    ),
    public=True,

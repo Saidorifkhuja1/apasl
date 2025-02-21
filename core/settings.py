@@ -32,7 +32,7 @@ SECRET_KEY = "django-insecure-zpt&ylc%s_v(!_cfsd^bt!s!0$4u$1t^-w(()4g7v9dqnjv3+q
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ['https://https://apasl1.pythonanywhere.com']
+CSRF_TRUSTED_ORIGINS = ['https:/apasl1.pythonanywhere.com']
 CORS_ALLOW_ALL_ORIGINS = True
 
 
@@ -62,6 +62,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -72,6 +73,9 @@ MIDDLEWARE = [
 AUTH_USER_MODEL = "user.User"
 ROOT_URLCONF = 'core.urls'
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # React frontend
+]
 
 TEMPLATES = [
     {
@@ -92,8 +96,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "core.wsgi.application"
 
 
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+
 
 DATABASES = {
     "default": {
@@ -104,8 +107,7 @@ DATABASES = {
 }
 
 
-# Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
+
 
 SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {
@@ -216,3 +218,4 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
+

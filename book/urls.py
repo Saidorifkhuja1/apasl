@@ -10,7 +10,7 @@ urlpatterns = [
     path('books_list_russian/', BookListRussianView.as_view()),
     path('book_detail_russian/<uuid:uid>/', BookRetrieveRussianView.as_view()),
     path('books_list_english/', BookListEnglishView.as_view()),
-    path('book_detail_english/<uuid:uid>//', BookRetrieveEnglishView.as_view()),
+    path('book_detail_english/<uuid:uid>/', BookRetrieveEnglishView.as_view()),
 ]
 
 

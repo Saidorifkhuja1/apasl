@@ -36,3 +36,25 @@ class OrganiserListView(generics.ListAPIView):
     queryset = Organiser.objects.all()
     serializer_class = OrganiserSerializer
     # permission_classes = [IsAdminUser]
+####################################################################
+
+class OrganiserListRussianView(generics.ListAPIView):
+    queryset = Organiser.objects.all()
+    serializer_class = OrganiserRussianSerializer
+
+
+class OrganiserRetrieveRussianView(generics.RetrieveAPIView):
+    queryset = Organiser.objects.all()
+    serializer_class = OrganiserRussianSerializer
+    lookup_field = 'uid'
+
+
+class OrganiserListEnglishView(generics.ListAPIView):
+    queryset = Organiser.objects.all()
+    serializer_class = OrganiserEnglishSerializer
+
+class OrganiserRetrieveEnglishView(generics.RetrieveAPIView):
+    queryset = Organiser.objects.all()
+    serializer_class = OrganiserEnglishSerializer
+    lookup_field = 'uid'
+

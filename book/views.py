@@ -21,7 +21,6 @@ class BookRetrieveView(generics.RetrieveAPIView):
 
 
 
-
 class BookUpdateView(generics.UpdateAPIView):
     queryset = Book.objects.all()
     serializer_class = BookUpdateSerializer
@@ -40,3 +39,29 @@ class BookListView(generics.ListAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     # permission_classes = [IsAdminUser]
+
+#######################################################################
+class BookListRussianView(generics.ListAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookRussianSerializer
+
+
+
+
+class BookRetrieveRussianView(generics.RetrieveAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookRussianSerializer
+    lookup_field = 'uid'
+
+
+
+class BookListEnglishView(generics.ListAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookEnglishSerializer
+
+
+class BookRetrieveEnglishView(generics.RetrieveAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookEnglishSerializer
+    lookup_field = 'uid'
+

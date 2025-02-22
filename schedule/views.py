@@ -36,3 +36,31 @@ class ScheduleListView(generics.ListAPIView):
     queryset = Schedule.objects.all()
     serializer_class = ScheduleSerializer
     # permission_classes = [IsAdminUser]
+
+###################################################################
+
+class ScheduleListRussianView(generics.ListAPIView):
+    queryset = Schedule.objects.all()
+    serializer_class = ScheduleRussianSerializer
+
+class ScheduleRetrieveRussianView(generics.RetrieveAPIView):
+        queryset = Schedule.objects.all()
+        serializer_class = ScheduleRussianSerializer
+        lookup_field = 'uid'
+
+
+
+class ScheduleListEnglishView(generics.ListAPIView):
+    queryset = Schedule.objects.all()
+    serializer_class = ScheduleEnglishSerializer
+
+
+
+class ScheduleRetrieveEnglishView(generics.RetrieveAPIView):
+    queryset = Schedule.objects.all()
+    serializer_class = ScheduleEnglishSerializer
+    lookup_field = 'uid'
+
+
+
+

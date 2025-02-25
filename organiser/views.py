@@ -58,3 +58,12 @@ class OrganiserRetrieveEnglishView(generics.RetrieveAPIView):
     serializer_class = OrganiserEnglishSerializer
     lookup_field = 'uid'
 
+
+class OrganiserListUzbekView(generics.ListAPIView):
+    queryset = Organiser.objects.all()
+    serializer_class = OrganiserUzbekSerializer
+
+class OrganiserRetrieveUzbekView(generics.RetrieveAPIView):
+    queryset = Organiser.objects.all()
+    serializer_class = OrganiserUzbekSerializer
+    lookup_field = 'uid'

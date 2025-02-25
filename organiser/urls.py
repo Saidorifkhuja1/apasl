@@ -13,5 +13,7 @@ urlpatterns = [
     path('organiser_detail_ru/<uuid:uid>/', OrganiserRetrieveRussianView.as_view()),
     path('organisers_list_en/', OrganiserListEnglishView.as_view()),
     path('organisers_detail_en/<uuid:uid>/', OrganiserRetrieveEnglishView.as_view()),
+    path('organisers_list_uz/', OrganiserListUzbekView.as_view()),
+    path('organisers_detail_uz/<uuid:uid>/', OrganiserRetrieveUzbekView.as_view()),
 
 ]

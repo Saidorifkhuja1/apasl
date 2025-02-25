@@ -13,6 +13,8 @@ urlpatterns = [
     path('speakers_details_ru/<uuid:uid>/', SpeakerRetrieveRussianView.as_view()),
     path('speaker_list_en/', SpeakerListEnglishView.as_view()),
     path('speakers_details_en/<uuid:uid>/', SpeakerRetrieveEnglishView.as_view()),
+    path('speaker_list_uz/', SpeakerListUzbekView.as_view()),
+    path('speakers_details_uz/<uuid:uid>/', SpeakerRetrieveUzbekView.as_view()),
 
 ]
 

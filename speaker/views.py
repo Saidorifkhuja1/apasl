@@ -60,3 +60,14 @@ class SpeakerRetrieveEnglishView(generics.RetrieveAPIView):
     serializer_class = SpeakerEnglishSerializer
     lookup_field = 'uid'
 
+
+
+class SpeakerListUzbekView(generics.ListAPIView):
+    queryset = Speaker.objects.all()
+    serializer_class = SpeakerUzbekSerializer
+
+
+class SpeakerRetrieveUzbekView(generics.RetrieveAPIView):
+    queryset = Speaker.objects.all()
+    serializer_class = SpeakerUzbekSerializer
+    lookup_field = 'uid'

@@ -39,7 +39,6 @@ class SpeakerListView(generics.ListAPIView):
 
 ##########################################################################
 
-
 class SpeakerListRussianView(generics.ListAPIView):
     queryset = Speaker.objects.all()
     serializer_class = SpeakerRussianSerializer
@@ -49,25 +48,56 @@ class SpeakerRetrieveRussianView(generics.RetrieveAPIView):
     serializer_class = SpeakerRussianSerializer
     lookup_field = 'uid'
 
-
 class SpeakerListEnglishView(generics.ListAPIView):
     queryset = Speaker.objects.all()
     serializer_class = SpeakerEnglishSerializer
-
 
 class SpeakerRetrieveEnglishView(generics.RetrieveAPIView):
     queryset = Speaker.objects.all()
     serializer_class = SpeakerEnglishSerializer
     lookup_field = 'uid'
 
-
-
 class SpeakerListUzbekView(generics.ListAPIView):
     queryset = Speaker.objects.all()
     serializer_class = SpeakerUzbekSerializer
-
 
 class SpeakerRetrieveUzbekView(generics.RetrieveAPIView):
     queryset = Speaker.objects.all()
     serializer_class = SpeakerUzbekSerializer
     lookup_field = 'uid'
+
+
+
+
+
+# class SpeakerListRussianView(generics.ListAPIView):
+#     queryset = Speaker.objects.all()
+#     serializer_class = SpeakerRussianSerializer
+#
+# class SpeakerRetrieveRussianView(generics.RetrieveAPIView):
+#     queryset = Speaker.objects.all()
+#     serializer_class = SpeakerRussianSerializer
+#     lookup_field = 'uid'
+#
+#
+# class SpeakerListEnglishView(generics.ListAPIView):
+#     queryset = Speaker.objects.all()
+#     serializer_class = SpeakerEnglishSerializer
+#
+#
+# class SpeakerRetrieveEnglishView(generics.RetrieveAPIView):
+#     queryset = Speaker.objects.all()
+#     serializer_class = SpeakerEnglishSerializer
+#     lookup_field = 'uid'
+#
+#
+#
+# class SpeakerListUzbekView(generics.ListAPIView):
+#     queryset = Speaker.objects.all()
+#     serializer_class = SpeakerUzbekSerializer
+#
+#
+# class SpeakerRetrieveUzbekView(generics.RetrieveAPIView):
+#     queryset = Speaker.objects.all()
+#     serializer_class = SpeakerUzbekSerializer
+#     lookup_field = 'uid'

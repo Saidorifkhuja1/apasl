@@ -44,7 +44,7 @@ class BaseOrganiserSerializer(serializers.ModelSerializer):
                     data[field] = getattr(instance, field)
 
         # Translate 'name' only if the language is NOT Uzbek
-        if self.language != "uz":
+        if self.language not in ["uz", "en"]:
             cache_key = f"organiser_name_{self.language}_{instance.uid}"
             cached_value = cache.get(cache_key)
 

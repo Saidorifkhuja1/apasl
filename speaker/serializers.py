@@ -16,6 +16,7 @@ class SpeakerSerializer(serializers.ModelSerializer):
 
 
 
+
 class BaseOrganiserSerializer(serializers.ModelSerializer):
     language = None
 
@@ -27,8 +28,7 @@ class BaseOrganiserSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         translator = Translator()
 
-
-        for field in ['name', 'role', 'description']:
+        for field in ['role', 'description']:  # Always translate these fields
             cache_key = f"organiser_{field}_{self.language}_{instance.uid}"
             cached_value = cache.get(cache_key)
 
@@ -43,8 +43,23 @@ class BaseOrganiserSerializer(serializers.ModelSerializer):
                     print(f"Translation error for {field} ({self.language}): {e}")
                     data[field] = getattr(instance, field)
 
-        return data
+        # Translate 'name' only if the language is NOT Uzbek
+        if self.language != "uz":
+            cache_key = f"organiser_name_{self.language}_{instance.uid}"
+            cached_value = cache.get(cache_key)
 
+            if cached_value:
+                data["name"] = cached_value
+            else:
+                try:
+                    translated_text = translator.translate(instance.name, self.language).result
+                    data["name"] = translated_text
+                    cache.set(cache_key, translated_text, timeout=86400)
+                except Exception as e:
+                    print(f"Translation error for name ({self.language}): {e}")
+                    data["name"] = instance.name
+
+        return data
 
 
 class SpeakerRussianSerializer(BaseOrganiserSerializer):
@@ -62,32 +77,6 @@ class SpeakerUzbekSerializer(BaseOrganiserSerializer):
 
 
 
-class OrganiserListRussianView(generics.ListAPIView):
-    queryset = Speaker.objects.all()
-    serializer_class = SpeakerRussianSerializer
-
-class SpeakerRetrieveRussianView(generics.RetrieveAPIView):
-    queryset = Speaker.objects.all()
-    serializer_class = SpeakerRussianSerializer
-    lookup_field = 'uid'
-
-class OrganiserListEnglishView(generics.ListAPIView):
-    queryset = Speaker.objects.all()
-    serializer_class = SpeakerEnglishSerializer
-
-class OrganiserRetrieveEnglishView(generics.RetrieveAPIView):
-    queryset = Speaker.objects.all()
-    serializer_class = SpeakerEnglishSerializer
-    lookup_field = 'uid'
-
-class OrganiserListUzbekView(generics.ListAPIView):
-    queryset = Speaker.objects.all()
-    serializer_class = SpeakerUzbekSerializer
-
-class OrganiserRetrieveUzbekView(generics.RetrieveAPIView):
-    queryset = Speaker.objects.all()
-    serializer_class = SpeakerUzbekSerializer
-    lookup_field = 'uid'
 
 
 
@@ -101,87 +90,3 @@ class OrganiserRetrieveUzbekView(generics.RetrieveAPIView):
 
 
 
-
-
-
-# class SpeakerRussianSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Speaker
-#         fields = '__all__'
-#
-#     def to_representation(self, instance):
-#         data = super().to_representation(instance)
-#
-#         translator = GoogleTranslator(source='auto', target='ru')
-#
-#
-#         for field in ['name', 'role', 'description']:
-#             cache_key = f"organiser_{field}_ru_{instance.uid}"
-#             cached_value = cache.get(cache_key)
-#
-#             if cached_value:
-#                 data[field] = cached_value
-#             else:
-#                 try:
-#                     data[field] = translator.translate(getattr(instance, field))
-#                     cache.set(cache_key, data[field], timeout=86400)
-#                 except Exception as e:
-#                     print(f"Translation error for {field}: {e}")
-#                     data[field] = getattr(instance, field)
-#
-#         return data
-#
-# class SpeakerEnglishSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Speaker
-#         fields = '__all__'
-#
-#     def to_representation(self, instance):
-#         data = super().to_representation(instance)
-#
-#         translator = GoogleTranslator(source='auto', target='en')
-#
-#         # Use caching to avoid repeated API calls
-#         for field in ['name', 'role', 'description']:
-#             cache_key = f"organiser_{field}_en_{instance.uid}"
-#             cached_value = cache.get(cache_key)
-#
-#             if cached_value:
-#                 data[field] = cached_value
-#             else:
-#                 try:
-#                     data[field] = translator.translate(getattr(instance, field))
-#                     cache.set(cache_key, data[field], timeout=86400)
-#                 except Exception as e:
-#                     print(f"Translation error for {field}: {e}")
-#                     data[field] = getattr(instance, field)
-#
-#         return data
-#
-#
-# class SpeakerUzbekSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Speaker
-#         fields = '__all__'
-#
-#     def to_representation(self, instance):
-#         data = super().to_representation(instance)
-#
-#         translator = GoogleTranslator(source='auto', target='uz')
-#
-#         # Use caching to avoid repeated API calls
-#         for field in ['name', 'role', 'description']:
-#             cache_key = f"organiser_{field}_uz_{instance.uid}"
-#             cached_value = cache.get(cache_key)
-#
-#             if cached_value:
-#                 data[field] = cached_value
-#             else:
-#                 try:
-#                     data[field] = translator.translate(getattr(instance, field))
-#                     cache.set(cache_key, data[field], timeout=86400)
-#                 except Exception as e:
-#                     print(f"Translation error for {field}: {e}")
-#                     data[field] = getattr(instance, field)
-#
-#         return data

@@ -62,6 +62,9 @@ class SpeakerListUzbekView(generics.ListAPIView):
     serializer_class = SpeakerUzbekSerializer
 
 
+
+
+
 class SpeakerRetrieveUzbekView(generics.RetrieveAPIView):
     queryset = Speaker.objects.all()
     serializer_class = SpeakerUzbekSerializer

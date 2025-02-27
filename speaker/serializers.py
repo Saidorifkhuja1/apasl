@@ -15,8 +15,6 @@ class SpeakerSerializer(serializers.ModelSerializer):
 
 
 
-
-
 class BaseOrganiserSerializer(serializers.ModelSerializer):
     language = None
 

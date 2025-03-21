@@ -71,9 +71,3 @@ class OctoPaymentSerializer(serializers.Serializer):
     count = serializers.IntegerField(min_value=1)
 
 
-
-# class OctoPaymentRequestSerializer(serializers.Serializer):
-#     full_name = serializers.CharField()
-#     phone_number = serializers.CharField()
-#     email = serializers.EmailField()
-#     count = serializers.IntegerField()

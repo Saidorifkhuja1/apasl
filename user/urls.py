@@ -12,5 +12,7 @@ urlpatterns = [
    path('reset_password/', PasswordResetView.as_view()),
    path('delete_profile/<uuid:uid>/', DeleteProfileAPIView.as_view()),
 
+   path("payment/", OctoPaymentInitView.as_view(), name="octo-init-payment"),
+
 ]
 

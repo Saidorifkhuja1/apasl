@@ -63,3 +63,8 @@ class PasswordResetSerializer(serializers.Serializer):
 
 
 
+
+class OctoPaymentInitSerializer(serializers.Serializer):
+
+    pass
+

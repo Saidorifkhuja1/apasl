@@ -122,3 +122,75 @@ class DeleteProfileAPIView(generics.DestroyAPIView):
         self.perform_destroy(user)
 
         return Response({"message": "User successfully deleted"}, status=status.HTTP_204_NO_CONTENT)
+
+
+
+
+import requests
+import time
+from datetime import datetime
+from rest_framework import status, permissions, generics
+from rest_framework.response import Response
+
+class OctoPaymentInitView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = OctoPaymentInitSerializer
+    def post(self, request, *args, **kwargs):
+        try:
+            user = request.user
+
+            shop_transaction_id = f"order_{int(time.time() * 1000)}"
+
+            user_data = {
+                "user_id": str(user.uid),
+                "phone": user.phone_number.replace("+", ""),
+                "email": user.email,
+            }
+
+            payload = {
+                "octo_shop_id": 27137,
+                "octo_secret": "3be1f3d7-9a10-4e8a-af18-5ee82c428baa",
+                "shop_transaction_id": shop_transaction_id,
+                "auto_capture": True,
+                "test": True,
+                "init_time": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+                "user_data": user_data,
+                "total_sum": 2500.0,
+                "currency": "UZS",
+                "description": "PAYMENT",
+                "basket": [
+                    {"count": 2, "position_desc": "VIP", "price": 1000.0},
+                    {"count": 1, "position_desc": "VIP", "price": 500.0},
+                ],
+                "payment_methods": [
+                    {"method": "bank_card"},
+                    {"method": "uzcard"},
+                    {"method": "humo"},
+                ],
+                "tsp_id": 18,
+                "return_url": "https://octo.uz",
+                "notify_url": "https://notify-url.uz",
+                "language": "uz",
+                "ttl": 15,
+            }
+
+            response = requests.post("https://pay.octo.uz/api/init-payment", json=payload)
+            data = response.json()
+
+            if response.status_code == 200 and data.get("error") == 0:
+                return Response({
+                    "status": "success",
+                    "payment_url": data["data"]["octo_pay_url"],
+                    "transaction_id": data["data"]["shop_transaction_id"],
+                    "uuid": data["data"]["octo_payment_UUID"],
+                    "total_sum": data["data"]["total_sum"],
+                }, status=status.HTTP_200_OK)
+
+            return Response({
+                "status": "failed",
+                "error": data.get("errMessage", "Unexpected error"),
+                "raw": data
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

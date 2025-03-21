@@ -20,3 +20,23 @@ def unhash_token(request_header):
             raise AuthenticationFailed("Invalid or expired token")
     else:
         raise AuthenticationFailed("Authorization header missing")
+
+
+
+
+import uuid
+
+
+def mock_octo_prepare_payment(data):
+    return {
+        "error": 0,
+        "data": {
+            "shop_transaction_id": data.get("shop_transaction_id"),
+            "octo_payment_UUID": str(uuid.uuid4()),
+            "status": "created",
+            "octo_pay_url": f"https://mocked.octo.uz/pay/{uuid.uuid4()}?language=uz",
+            "refunded_sum": 0,
+            "total_sum": data.get("total_sum", 0),
+        },
+        "apiMessageForDevelopers": "Mocked response",
+    }

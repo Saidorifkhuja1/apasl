@@ -1,4 +1,5 @@
-
+import requests
+from rest_framework.generics import GenericAPIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from .serializers import *
@@ -10,7 +11,7 @@ from rest_framework.exceptions import NotFound, AuthenticationFailed
 from django.contrib.auth.hashers import make_password, check_password
 from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
-
+from datetime import datetime
 
 
 class UserRegistrationAPIView(generics.CreateAPIView):
@@ -125,15 +126,7 @@ class DeleteProfileAPIView(generics.DestroyAPIView):
 
 
 
-# views.py
 
-import time
-import datetime
-import requests
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.generics import GenericAPIView
-from .serializers import OctoPaymentSerializer
 
 class OctoPaymentInitView(GenericAPIView):
     serializer_class = OctoPaymentSerializer
@@ -141,29 +134,38 @@ class OctoPaymentInitView(GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data
 
-        count = data["count"]
-        # You can customize this basket logic as needed
-        basket = [
-            {"count": 2, "position_desc": "VIP", "price": 1000.0},
-            {"count": 1, "position_desc": "VIP", "price": 500.0},
-        ]
-        total_sum = sum(item["count"] * item["price"] for item in basket)
+        full_name = serializer.validated_data['full_name']
+        phone_number = serializer.validated_data['phone_number']
+        email = serializer.validated_data['email']
+        count = serializer.validated_data['count']
+
+        total_price = 2500  # fixed total price, or calculate dynamically
+        transaction_id = f"order_{int(datetime.now().timestamp() * 1000)}"
+
+        # Calculate price per item using integer division
+        price_per_item = total_price // count
+        basket = [{"count": count, "position_desc": "VIP", "price": price_per_item}]
+
+        # Ensure basket sum matches total_price exactly
+        basket_sum = sum(item["count"] * item["price"] for item in basket)
+        if basket_sum != total_price:
+            diff = total_price - basket_sum
+            basket[-1]["price"] += diff
 
         payload = {
             "octo_shop_id": 27137,
             "octo_secret": "3be1f3d7-9a10-4e8a-af18-5ee82c428baa",
-            "shop_transaction_id": "order_" + str(int(time.time() * 1000)),
+            "shop_transaction_id": transaction_id,
             "auto_capture": True,
             "test": True,
-            "init_time": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            "init_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "user_data": {
-                "user_id": data["full_name"],
-                "phone": data["phone_number"],
-                "email": data["email"],
+                "user_id": full_name,
+                "phone": phone_number,
+                "email": email,
             },
-            "total_sum": total_sum,
+            "total_sum": total_price,
             "currency": "UZS",
             "description": "TEST_PAYMENT",
             "basket": basket,
@@ -176,12 +178,97 @@ class OctoPaymentInitView(GenericAPIView):
             "return_url": "https://octo.uz",
             "notify_url": "https://notify-url.uz",
             "language": "uz",
-            "ttl": 15,
+            "ttl": 15
         }
 
-        response = requests.post("https://api.octo.uz/api/payment/prepare", json=payload)
-        response_data = response.json()
+        try:
+            response = requests.post(
+                "https://secure.octo.uz/prepare_payment",
+                json=payload,
+                timeout=10,
+                headers={"Content-Type": "application/json"},
+                proxies={"http": None, "https": None}
+            )
 
-        if response.status_code == 200 and response_data.get("error") == 0:
-            return Response(response_data["data"], status=status.HTTP_200_OK)
-        return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+            data = response.json()
+
+            if data.get("error") == 0:
+                return Response({
+                    "pay_url": data["data"]["octo_pay_url"],
+                    "transaction_id": data["data"]["shop_transaction_id"],
+                    "uuid": data["data"]["octo_payment_UUID"]
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": data.get("errMessage", "Payment initialization failed.")},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+        except requests.RequestException as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# def mock_octo_prepare_payment(payload):
+#     # This simulates OCTO API response
+#     return {
+#         "error": 0,
+#         "data": {
+#             "shop_transaction_id": payload["shop_transaction_id"],
+#             "octo_payment_UUID": "mocked-uuid-123456",
+#             "status": "created",
+#             "octo_pay_url": f"https://pay2.octo.uz/pay/mocked-uuid-123456?language=uz",
+#             "refunded_sum": 0,
+#             "total_sum": payload["total_sum"]
+#         }
+#     }
+#
+# class OctoPaymentInitView(APIView):
+#     @swagger_auto_schema(
+#         request_body=OctoPaymentRequestSerializer,
+#         operation_description="Initialize OCTO payment for unregistered users.",
+#         responses={200: openapi.Response(description="Payment initialized")},
+#     )
+#     def post(self, request):
+#         serializer = OctoPaymentRequestSerializer(data=request.data)
+#         if not serializer.is_valid():
+#             return Response({"error": "Missing required fields", "details": serializer.errors}, status=400)
+#
+#         data = serializer.validated_data
+#         full_name = data["full_name"]
+#         phone_number = data["phone_number"]
+#         email = data["email"]
+#         count = data["count"]
+#
+#         basket = [
+#             {"count": count, "position_desc": "VIP", "price": 1000.0},
+#         ]
+#         total_sum = sum(item["count"] * item["price"] for item in basket)
+#
+#         payload = {
+#             "octo_shop_id": 27137,
+#             "octo_secret": "3be1f3d7-9a10-4e8a-af18-5ee82c428baa",
+#             "shop_transaction_id": f"order_{int(datetime.now().timestamp())}",
+#             "auto_capture": True,
+#             "test": True,
+#             "init_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+#             "user_data": {
+#                 "user_id": full_name,
+#                 "phone": phone_number,
+#                 "email": email,
+#             },
+#             "total_sum": total_sum,
+#             "currency": "UZS",
+#             "description": "TEST_PAYMENT",
+#             "basket": basket,
+#             "payment_methods": [
+#                 {"method": "bank_card"},
+#                 {"method": "uzcard"},
+#                 {"method": "humo"},
+#             ],
+#             "tsp_id": 18,
+#             "return_url": "https://octo.uz",
+#             "notify_url": "https://notify-url.uz",
+#             "language": "uz",
+#             "ttl": 15,
+#         }
+#
+#         response = mock_octo_prepare_payment(payload)
+#         return Response(response, status=status.HTTP_200_OK)

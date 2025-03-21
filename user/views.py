@@ -125,72 +125,63 @@ class DeleteProfileAPIView(generics.DestroyAPIView):
 
 
 
+# views.py
 
-import requests
 import time
-from datetime import datetime
-from rest_framework import status, permissions, generics
+import datetime
+import requests
+from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.generics import GenericAPIView
+from .serializers import OctoPaymentSerializer
 
-class OctoPaymentInitView(generics.GenericAPIView):
-    permission_classes = [permissions.IsAuthenticated]
-    serializer_class = OctoPaymentInitSerializer
+class OctoPaymentInitView(GenericAPIView):
+    serializer_class = OctoPaymentSerializer
+
     def post(self, request, *args, **kwargs):
-        try:
-            user = request.user
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
 
-            shop_transaction_id = f"order_{int(time.time() * 1000)}"
+        count = data["count"]
+        # You can customize this basket logic as needed
+        basket = [
+            {"count": 2, "position_desc": "VIP", "price": 1000.0},
+            {"count": 1, "position_desc": "VIP", "price": 500.0},
+        ]
+        total_sum = sum(item["count"] * item["price"] for item in basket)
 
-            user_data = {
-                "user_id": str(user.uid),
-                "phone": user.phone_number.replace("+", ""),
-                "email": user.email,
-            }
+        payload = {
+            "octo_shop_id": 27137,
+            "octo_secret": "3be1f3d7-9a10-4e8a-af18-5ee82c428baa",
+            "shop_transaction_id": "order_" + str(int(time.time() * 1000)),
+            "auto_capture": True,
+            "test": True,
+            "init_time": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            "user_data": {
+                "user_id": data["full_name"],
+                "phone": data["phone_number"],
+                "email": data["email"],
+            },
+            "total_sum": total_sum,
+            "currency": "UZS",
+            "description": "TEST_PAYMENT",
+            "basket": basket,
+            "payment_methods": [
+                {"method": "bank_card"},
+                {"method": "uzcard"},
+                {"method": "humo"},
+            ],
+            "tsp_id": 18,
+            "return_url": "https://octo.uz",
+            "notify_url": "https://notify-url.uz",
+            "language": "uz",
+            "ttl": 15,
+        }
 
-            payload = {
-                "octo_shop_id": 27137,
-                "octo_secret": "3be1f3d7-9a10-4e8a-af18-5ee82c428baa",
-                "shop_transaction_id": shop_transaction_id,
-                "auto_capture": True,
-                "test": True,
-                "init_time": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
-                "user_data": user_data,
-                "total_sum": 2500.0,
-                "currency": "UZS",
-                "description": "PAYMENT",
-                "basket": [
-                    {"count": 2, "position_desc": "VIP", "price": 1000.0},
-                    {"count": 1, "position_desc": "VIP", "price": 500.0},
-                ],
-                "payment_methods": [
-                    {"method": "bank_card"},
-                    {"method": "uzcard"},
-                    {"method": "humo"},
-                ],
-                "tsp_id": 18,
-                "return_url": "https://octo.uz",
-                "notify_url": "https://notify-url.uz",
-                "language": "uz",
-                "ttl": 15,
-            }
+        response = requests.post("https://api.octo.uz/api/payment/prepare", json=payload)
+        response_data = response.json()
 
-            response = requests.post("https://pay.octo.uz/api/init-payment", json=payload)
-            data = response.json()
-
-            if response.status_code == 200 and data.get("error") == 0:
-                return Response({
-                    "status": "success",
-                    "payment_url": data["data"]["octo_pay_url"],
-                    "transaction_id": data["data"]["shop_transaction_id"],
-                    "uuid": data["data"]["octo_payment_UUID"],
-                    "total_sum": data["data"]["total_sum"],
-                }, status=status.HTTP_200_OK)
-
-            return Response({
-                "status": "failed",
-                "error": data.get("errMessage", "Unexpected error"),
-                "raw": data
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if response.status_code == 200 and response_data.get("error") == 0:
+            return Response(response_data["data"], status=status.HTTP_200_OK)
+        return Response(response_data, status=status.HTTP_400_BAD_REQUEST)

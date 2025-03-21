@@ -64,7 +64,8 @@ class PasswordResetSerializer(serializers.Serializer):
 
 
 
-class OctoPaymentInitSerializer(serializers.Serializer):
-
-    pass
-
+class OctoPaymentSerializer(serializers.Serializer):
+    full_name = serializers.CharField(max_length=255)
+    phone_number = serializers.CharField(max_length=20)
+    email = serializers.EmailField()
+    count = serializers.IntegerField(min_value=1)
